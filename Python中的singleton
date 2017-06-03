@@ -1,0 +1,60 @@
+
+
+Singleton是Design Pattern中的一种pattern。Singleton是一种类，只允许有一个实例存在。
+
+实现Python中的Singleton,我们需要控制实例的产生。我们可以用到__new__方法。
+
+__new__是一个类方法(classmethod)，这意味着__new__需要（抽象）类作为第一个参数，这时由于在调用__new__的时候，实例并不存在，所以我们不能使用self。
+
+    __new__负责产生实例，因此要返回一个实例。
+    __init__负责初始化实例，它在__new__后面被调用。__init__不能返回任何值。
+
+下面这段代码验证了上面的说法
+
+class A(object):
+    def __new__(cls):
+        print "A.__new__"
+        return super(A,cls).__new__(cls)
+        # return 12
+
+    def __init__(self):
+        print "A.__init__"
+
+print A()
+
+有趣的是，如果我们使用return 12，我们会发现A()就是12。
+
+有了上面的基础，我们可以这样写Singleton:
+
+class A(object):
+    __instance = None
+    def __new__(cls,x):
+        if A.__instance is None:
+            A.__instance = super(A, cls).__new__(cls)
+        A.__instance.val = x
+        return A.__instance
+
+
+a = A(1)
+print a.val
+b = A(2)
+print b.val
+print a.val
+
+注意__instance是一个”类”的成员，而不是实例的成员，如果要调用，需要用A.__instance调用。同时，加上__表示这个成员是private的。
+
+我们也可以通过抛出异常来制作Singleton:
+
+class A(object):
+    __singleton = None
+    def __init__(self,x):
+        if not A.__singleton:
+            A.__singleton = 1
+            self.x = x
+        else:
+            raise RuntimeError('the class already exists!')
+
+a = A(1)
+b = A(2)
+
+注意这里我们永远只创造了一个实例。
