@@ -1,0 +1,53 @@
+Python支持多重继承，因此我们讲一个类的superclass是没有意义的。函数super并不返回superclass，而是返回proxy class。通过proxy class，我们沿着MRO(Method Resolution Order)走到object类。
+
+例如下面的这个例子:
+         -> A -> C 
+object             -> E
+         -> B -> D 
+
+如果我们运行下面这段代码：
+
+class A(object):
+    def __init__(self):
+        print "calling A.__init__"
+        # B.__init__(self)
+        super(A, self).__init__()
+
+class B(object):
+    def __init__(self):
+        print "calling B.__init__"
+        super(B, self).__init__()
+
+class C(A):
+    def __init__(self):
+        print "calling C.__init__"
+        super(C, self).__init__()
+
+class D(B):
+    def __init__(self):
+        print "calling D.__init__"
+        super(D, self).__init__()
+
+class E(C,D):
+    def __init__(self):
+        print "calling E.__init__"
+        super(E, self).__init__()
+
+E()
+
+我们将得到
+
+calling E.__init__
+calling C.__init__
+calling A.__init__
+calling D.__init__
+calling B.__init__
+
+这里初始化的顺序恰好是MRO。另一方面，如果我们将super(A, self).__init__()注释掉，用B.__init__(self)代替，结果是
+
+calling E.__init__
+calling C.__init__
+calling A.__init__
+calling B.__init__
+
+这时，我们看到，初始化跳过了D。
